@@ -23,8 +23,8 @@
   nix-update-script,
 }:
 stdenv.mkDerivation (finalAttrs: {
-  pname = "louvre";
-  version = "2.18.1-1";
+  pname = "louvreVK";
+  version = "2.18.2-1";
 
   src = fetchFromGitHub {
     owner = "aCeTotal";

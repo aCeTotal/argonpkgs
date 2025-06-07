@@ -10,22 +10,26 @@
 , libGL
 , libinput
 , wayland
-, louvre           # ← din lokale Louvre-derivasjon
 , nix-update-script
+, argonpkgs
+, system
+, ...
 }:
 
-stdenv.mkDerivation rec {
-  pname    = "argon";
+let
+  # Plukk ut Argon‐pakke‐settet for dette systemet
+  argon = argonpkgs.packages.${system};
+in stdenv.mkDerivation rec {
+  pname    = "argonwm";
   version  = "0.1.1-1";
 
   src = fetchFromGitHub {
-    owner = "aCeTotal";
-    repo  = "argon";
-    rev   = "e1b19fdceb00acbaaa7be9b327d18aad8c931878";
+    owner  = "aCeTotal";
+    repo   = "argon";
+    rev    = "e1b19fdceb00acbaaa7be9b327d18aad8c931878";
     sha256 = "eCEgju2PA/qZmgmXxLcCOeqEzSMMtG7kknxkBa0ljkc=";
   };
 
-  # Meson, Ninja og pkg-config må være tilgjengelig under bygg
   nativeBuildInputs = [
     meson
     ninja
@@ -39,7 +43,9 @@ stdenv.mkDerivation rec {
     fontconfig
     freetype
     icu
-    louvre
+
+    # Her bruker vi Argon‐utgaven av louvre i stedet for pkgs.louvre
+    argon.louvre
   ];
 
   configurePhase = ''
@@ -59,13 +65,11 @@ stdenv.mkDerivation rec {
     updateScript = nix-update-script {};
   };
 
-  meta = {
+  meta = with lib; {
     description = "C++ Wayland compositor and Vulkan renderer";
     homepage    = "https://github.com/aCeTotal/argon";
-    mainProgram = "argon";
-    maintainers = [ lib.maintainers.aCeTotal ];
-    platforms   = lib.platforms.linux;
+    maintainers = [ maintainers.aCeTotal ];
+    platforms   = platforms.linux;
   };
 }
-
 
