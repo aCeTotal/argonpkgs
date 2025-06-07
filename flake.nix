@@ -1,36 +1,26 @@
 {
-  description = "argonpkgs - just some derivations";
+  description = "argonpkgs – just some derivations";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
   outputs = { self, nixpkgs, ... }:
-  let
-    systems = [ "x86_64-linux" ];
-
-    overlay = final: prev: let
-      allPackages = 
-        builtins.listToAttrs (map (file: {
-          name  = builtins.replaceStrings [ ".nix" ] [ "" ] (builtins.baseNameOf file);
-          value = prev.callPackage (./packages/${builtins.baseNameOf file}) {};
-        }) (builtins.attrNames (builtins.readDir ./packages)));
+    let
+      systems = [ "x86_64-linux" ];
+      pkgFiles = builtins.attrNames (builtins.readDir ./packages);
     in
-
     {
-      inherit allPackages;
+      packages = builtins.listToAttrs (map (system: {
+        name = system;
+        value = let
+          pkgs = import nixpkgs { inherit system; };
+        in
+          builtins.listToAttrs (map (file: {
+            name  = builtins.replaceStrings [ ".nix" ] [ "" ] file;
+            value = import ./packages/${file} { inherit pkgs; };
+          }) pkgFiles);
+      }) systems);
     };
-  in
-  {
-    overlays = [ overlay ];
-
-    packages = builtins.listToAttrs (map (system: {
-      name  = system;
-      value = import nixpkgs {
-        inherit system;
-        overlays = [ overlay ];
-      };
-    }) systems);
-  };
 }
 
