@@ -16,10 +16,7 @@
             map (file:
               let
                 name = builtins.replaceStrings [".nix"] ["" ] file;
-                args = if file == "argon.nix"
-                        then { argonpkgs = final; }
-                        else {};
-                drv  = final.callPackage ./packages/${file} args;
+                drv  = final.callPackage ./packages/${file} {};
               in {
                 inherit name;
                 value = drv;
@@ -32,7 +29,6 @@
           overlays = [ myOverlay ];
         };
 
-        # Eksponer pakke-settet under packages.<system>.<name>
         pkgSet = builtins.listToAttrs (
           map (file:
             let name = builtins.replaceStrings [".nix"] ["" ] file;
