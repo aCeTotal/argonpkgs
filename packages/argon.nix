@@ -1,34 +1,44 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, meson
-, ninja
-, pkg-config
-, fontconfig
-, freetype
-, icu
-, libGL
-, libinput
-, wayland
-, nix-update-script
-, argonpkgs
-, system
-, ...
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  meson,
+  ninja,
+  pkg-config,
+  fontconfig,
+  icu,
+  libdrm,
+  libGL,
+  libinput,
+  libX11,
+  libXcursor,
+  libxkbcommon,
+  libgbm,
+  pixman,
+  seatd,
+  srm-cuarzo,
+  udev,
+  wayland,
+  xorgproto,
+  nix-update-script,
 }:
-
-let
-  # Plukk ut Argon‐pakke‐settet for dette systemet
-  argon = argonpkgs.packages.${system};
-in stdenv.mkDerivation rec {
-  pname    = "argonwm";
-  version  = "0.1.1-1";
+stdenv.mkDerivation (finalAttrs: {
+  pname = "argonWM";
+  version = "0.1.0-0";
 
   src = fetchFromGitHub {
-    owner  = "aCeTotal";
-    repo   = "argon";
-    rev    = "e1b19fdceb00acbaaa7be9b327d18aad8c931878";
-    sha256 = "eCEgju2PA/qZmgmXxLcCOeqEzSMMtG7kknxkBa0ljkc=";
+    owner = "aCeTotal";
+    repo = "argon";
+    rev = "d70ab4674345f26dca4293658ff3d2452e13210a";
+    hash = "sha256-ejc/Io/M4CHMHrbarD6X6Y3m5JNeZ+nhs7QyBl51OUY=";
   };
+
+  sourceRoot = "${finalAttrs.src.name}/src";
+
+  postPatch = ''
+    substituteInPlace tiling/meson.build \
+      --replace-fail "/usr/local/share/wayland-sessions" "${placeholder "out"}/share/wayland-sessions"
+  '';
 
   nativeBuildInputs = [
     meson
@@ -37,39 +47,39 @@ in stdenv.mkDerivation rec {
   ];
 
   buildInputs = [
-    libGL
-    wayland
-    libinput
     fontconfig
-    freetype
     icu
-
-    # Her bruker vi Argon‐utgaven av louvre i stedet for pkgs.louvre
-    argon.louvre
+    libdrm
+    libGL
+    libinput
+    libX11
+    libXcursor
+    libxkbcommon
+    libgbm
+    pixman
+    seatd
+    srm-cuarzo
+    udev
+    wayland
+    xorgproto
   ];
 
-  configurePhase = ''
-    mkdir -p build
-    meson setup --prefix=$out build .
-  '';
-
-  buildPhase = ''
-    ninja -C build
-  '';
-
-  installPhase = ''
-    ninja -C build install
-  '';
+  outputs = [
+    "out"
+    "dev"
+  ];
 
   passthru = {
-    updateScript = nix-update-script {};
+    updateScript = nix-update-script { };
   };
 
-  meta = with lib; {
-    description = "C++ Wayland compositor and Vulkan renderer";
-    homepage    = "https://github.com/aCeTotal/argon";
-    maintainers = [ maintainers.aCeTotal ];
-    platforms   = platforms.linux;
+  meta = {
+    description = "C++ Wayland tiling";
+    homepage = "https://github.com/aCeTotal/argon";
+    mainProgram = "argon";
+    maintainers = [ lib.maintainers.x ];
+    platforms = lib.platforms.linux;
   };
-}
+})
+
 
