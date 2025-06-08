@@ -29,8 +29,8 @@ stdenv.mkDerivation (finalAttrs: {
   src = fetchFromGitHub {
     owner = "aCeTotal";
     repo = "argon";
-    rev = "315aaa80b20fc11e4c6017cab715d6ff5cd0afa3";
-    hash = "sha256-Prqupu6sWxeFq3rt3N8xiEy/Ju4D4bCpog9bVkUYloc=";
+    rev = "a2cc90047ad1747844f04c022b46e8bdb3e08e43";
+    hash = "sha256-xuSGLoUoqWwQRrmbMjisHRoebhNSO0Bcb+GuuGeHECU=";
   };
 
   sourceRoot = "${finalAttrs.src.name}/";
