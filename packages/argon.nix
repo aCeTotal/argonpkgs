@@ -33,7 +33,7 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-ejc/Io/M4CHMHrbarD6X6Y3m5JNeZ+nhs7QyBl51OUY=";
   };
 
-  sourceRoot = "${finalAttrs.src.name}/src";
+  sourceRoot = "${finalAttrs.src.name}/";
 
   postPatch = ''
     substituteInPlace tiling/meson.build \
