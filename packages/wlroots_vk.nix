@@ -33,7 +33,7 @@
 let
   generic =
     {
-      version,
+      commit,
       hash,
       extraBuildInputs ? [ ],
       extraNativeBuildInputs ? [ ],
@@ -41,25 +41,21 @@ let
       postPatch ? "",
     }:
     stdenv.mkDerivation (finalAttrs: {
-      pname = "wlroots";
-      inherit version;
+      pname = "wlroots_vk";
+      version = commit;
 
       inherit enableXWayland;
 
       src = fetchFromGitHub {
         owner = "aCeTotal";
         repo = "wlroots_vk";
-        rev = finalAttrs.version;
+        rev = commit;
         inherit hash;
       };
 
       inherit patches postPatch;
 
-      # $out for the library and $examples for the example programs (in examples):
-      outputs = [
-        "out"
-        "examples"
-      ];
+      outputs = [ "out" "examples" ];
 
       strictDeps = true;
       depsBuildBuild = [ pkg-config ];
@@ -99,10 +95,6 @@ let
       mesonFlags = lib.optional (!finalAttrs.enableXWayland) "-Dxwayland=disabled";
 
       postFixup = ''
-        # Install ALL example programs to $examples:
-        # screencopy dmabuf-capture input-inhibitor layer-shell idle-inhibit idle
-        # screenshot output-layout multi-pointer rotation tablet touch pointer
-        # simple
         mkdir -p $examples/bin
         cd ./examples
         for binary in $(find . -executable -type f -printf '%P\n' | grep -vE '\.so'); do
@@ -110,7 +102,6 @@ let
         done
       '';
 
-      # Test via TinyWL (the "minimum viable product" Wayland compositor based on wlroots):
       passthru.tests = {
         tinywl = nixosTests.tinywl;
         pkg-config = testers.hasPkgConfigModules {
@@ -119,20 +110,16 @@ let
       };
 
       meta = {
-        description = "Modular Wayland compositor library";
+        description = "Modular Wayland compositor library with Vulkan modifications";
         longDescription = ''
           Pluggable, composable, unopinionated modules for building a Wayland
           compositor; or about 50,000 lines of code you were going to write anyway.
         '';
-        inherit (finalAttrs.src.meta) homepage;
-        changelog = "https://gitlab.freedesktop.org/wlroots/wlroots/-/tags/${version}";
+        homepage = "https://github.com/aCeTotal/wlroots_vk";
+        changelog = "https://github.com/aCeTotal/wlroots_vk/commit/${commit}";
         license = lib.licenses.mit;
         platforms = lib.platforms.linux;
-        maintainers = with lib.maintainers; [
-          primeos
-          synthetica
-          rewine
-        ];
+        maintainers = with lib.maintainers; [ ];
         pkgConfigModules = [
           (
             if lib.versionOlder finalAttrs.version "0.18" then
@@ -143,14 +130,13 @@ let
         ];
       };
     });
-
 in
-rec {
-  wlroots_0_1 = generic {
-    version = "0.1.0";
-    hash = "sha256-I8z50yA/ukvXEC5TksG84+GrQpfC4drBJDRGw0R8RLk=";
-    extraBuildInputs = [
-      lcms2
-    ];
+
+{
+  wlroots_vk = generic {
+    commit = "243b15cf3512e0cf8e87796d11d4583332a75bac";
+    hash = "sha256-+sVPZ9XlFnRqttAk8aELJmaKcqLsxH4U2i9BF3gYh2o=";
+    extraBuildInputs = [ lcms2 ];
   };
 }
+
