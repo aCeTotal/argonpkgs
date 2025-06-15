@@ -85,7 +85,6 @@ let
           libgbm
           pixman
           seatd
-          vulkan-loader
           wayland
           wayland-protocols
           xorg.libX11
